@@ -5,13 +5,14 @@ Site de vendas do CEOBiblico.ai — programa de Windows que manda um versículo 
 ## Arquivos
 
 - `index.html` — página de vendas: vídeo (VSL), telas do app e botão de compra.
-- `pressel.html` — pressel provisória; vai ser trocada pela versão com as perguntas.
 - `assets/` — logo, fonte Inter (licença em `assets/OFL.txt`), capa do vídeo e as capturas do app.
+
+A pressel (as 4 perguntas) fica em outro repositório: `site-pressel-ceobiblico`.
 
 ## Pendente
 
 - **Link do checkout**: os botões `ADQUIRIR CHAVE DE ACESSO` em `index.html` ainda apontam para `#checkout`. Trocar pelo link do Mercado Pago depois que a conta estiver configurada.
-- **Pressel**: substituir `pressel.html` pela versão com as perguntas e apontar o botão dela para `index.html`.
+- **Pressel**: apontar o botão final dela para o endereço desta página.
 
 ## Rodar local
 
