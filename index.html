@@ -7,6 +7,7 @@
   <meta name="description" content="Receba todo dia um versículo no seu computador e estude com o ChatGPT em um clique.">
   <meta name="theme-color" content="#121214">
   <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://yqfopqwuboqrmoljhknp.supabase.co">
   <style>
     /* Mesma fonte e cores do app e do site de entrega (Inter embutida — licença em assets/OFL.txt) */
     @font-face {
@@ -28,7 +29,6 @@
       --muted: #8d8d95;
       --gold: #c9a55a;
       --gold-2: #e3c585;
-      --serif: Georgia, "Times New Roman", serif;
       --sans: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
     }
 
@@ -54,28 +54,28 @@
     .brand span { display: block; color: var(--muted); font-weight: 400; font-size: 12px; }
 
     h1 { font-size: clamp(22px, 5.2vw, 34px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; margin: 20px auto 8px; max-width: 680px; }
-    h1 em { font-style: normal; color: var(--gold); }
+    h1 em, h2 em { font-style: normal; color: var(--gold); }
+    h2 { font-size: clamp(19px, 4.2vw, 26px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 10px auto 6px; }
     .lead { color: var(--muted); margin: 0 auto; max-width: 520px; }
 
-    /* VSL: horizontal (16:9) no celular e no PC */
+    /* Vídeo: começa 16:9 e se ajusta ao formato real do arquivo (deitado ou em pé) */
     .vsl {
       position: relative; margin: 20px auto 0; overflow: hidden;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      background: #000; border: 1px solid var(--border); border-radius: 14px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
       aspect-ratio: 16 / 9;
       width: 100%;
     }
-    /* O player fica sem cliques: quem manda são os nossos controles */
-    .vsl iframe, .vsl video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+    .vsl.is-vertical { max-width: 380px; }
+    .vsl video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
 
-    /* Capa do vídeo: só carrega o player depois do clique */
+    /* Capa: botão grande de play por cima do primeiro quadro */
     .vsl-cover {
       position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3;
-      padding: 0; border: 0; background: var(--surface); cursor: pointer;
-      display: grid; place-items: center;
+      padding: 0; border: 0; background: rgba(0, 0, 0, .35); cursor: pointer;
+      display: grid; place-items: center; transition: background .15s;
     }
-    .vsl-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .72; }
-    .vsl-cover:hover img { opacity: .85; }
+    .vsl-cover:hover { background: rgba(0, 0, 0, .2); }
     .play {
       position: relative; width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center;
       background: var(--gold); color: #17160f; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
@@ -120,8 +120,8 @@
     }
     .bar:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 3px; border-radius: 4px; }
 
-    .vsl:fullscreen { width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; border: 0; background: #000; }
-    .vsl:-webkit-full-screen { width: 100%; height: 100%; border-radius: 0; background: #000; }
+    .vsl:fullscreen { width: 100%; height: 100%; max-width: none; aspect-ratio: auto; border-radius: 0; border: 0; }
+    .vsl:-webkit-full-screen { width: 100%; height: 100%; max-width: none; border-radius: 0; }
 
     .cta { margin: 18px auto 0; max-width: 460px; }
     .btn {
@@ -142,39 +142,14 @@
     .secure { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
     .secure .icon { width: 14px; height: 14px; color: var(--gold); }
 
-    .perks {
-      list-style: none; padding: 0; margin: 36px auto 0; max-width: 760px;
-      display: grid; gap: 10px; text-align: left;
+    .bonus { margin: 52px auto 0; }
+    .tag {
+      display: inline-block; padding: 4px 10px; border-radius: 99px;
+      border: 1px solid var(--gold); color: var(--gold);
+      font-size: 11.5px; font-weight: 700; letter-spacing: .08em;
     }
-    @media (min-width: 760px) { .perks { grid-template-columns: repeat(3, 1fr); } }
-    .perks li { display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
-    .perks .icon { width: 22px; height: 22px; color: var(--gold); margin-top: 1px; stroke-width: 1.8; }
-    .perks b { display: block; font-size: 14.5px; }
-    .perks p { margin: 1px 0 0; color: var(--muted); font-size: 13.5px; }
 
-    /* Galeria de telas do app */
-    .shots { margin: 44px auto 0; max-width: 880px; }
-    .shots h2 { font-size: clamp(19px, 4.2vw, 24px); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
-    .shots .lead { margin-bottom: 22px; }
-    .grid { display: grid; gap: 14px; }
-    @media (min-width: 760px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-    .shot {
-      border: 1px solid var(--border); background: var(--surface);
-      border-radius: 14px; padding: 14px; text-align: left;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .shot img {
-      width: 100%; height: auto; display: block; border-radius: 10px;
-      border: 1px solid var(--border-2); background: var(--bg);
-    }
-    .shot b { font-size: 14.5px; }
-    .shot p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
-    .shots .cta { margin-top: 26px; }
-
-    .verse { font-family: var(--serif); font-size: 15.5px; line-height: 1.6; margin: 40px auto 0; max-width: 480px; }
-    .ref { color: var(--gold); font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin-top: 6px; }
-
-    footer { color: var(--muted); font-size: 12px; margin-top: 40px; }
+    footer { color: var(--muted); font-size: 12px; margin-top: 44px; }
     footer p { margin: 0 0 4px; }
   </style>
 </head>
@@ -188,44 +163,10 @@
     <h1>Um versículo por dia, <em>direto no seu computador</em></h1>
     <p class="lead">Assista ao vídeo e veja como funciona.</p>
 
-    <!-- VSL: vídeo do YouTube com controles próprios (sem a cara do YouTube) -->
-    <div class="vsl is-paused" id="vsl">
-      <div id="vslFrame"></div>
-
-      <button class="vsl-tap" id="vslTap" type="button" aria-label="Pausar ou continuar" hidden>
-        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></span>
-      </button>
-
-      <div class="vsl-ctl" id="vslCtl" hidden>
-        <button id="vslBtnPlay" type="button" aria-label="Pausar">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path id="vslIconPlay" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
-        </button>
-        <span class="vsl-time" id="vslCur">0:00</span>
-        <div class="bar" id="vslBar" role="slider" tabindex="0" aria-label="Avançar o vídeo"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="bar-track">
-            <div class="bar-fill" id="vslFill"></div>
-            <div class="bar-dot" id="vslDot"></div>
-          </div>
-        </div>
-        <span class="vsl-time" id="vslDur">0:00</span>
-        <button id="vslBtnMute" type="button" aria-label="Tirar o som">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path id="vslIconMute" d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-        </button>
-        <button id="vslBtnFs" type="button" aria-label="Tela cheia">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-
-      <button class="vsl-cover" id="vslPlay" type="button" aria-label="Assistir ao vídeo">
-        <img src="assets/video-capa.jpg" alt="">
-        <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></span>
-      </button>
-    </div>
+    <div class="vsl is-paused" data-src="https://yqfopqwuboqrmoljhknp.supabase.co/storage/v1/object/public/Videos/VID_20260923_100942.mp4" data-nome="CEOBiblico.ai"></div>
 
     <div class="cta">
-      <!-- Checkout: troque o href pelo link da página de pagamento -->
-      <a class="btn" id="buy" href="#checkout">
+      <a class="btn" href="#checkout" data-comprar>
         ADQUIRIR CHAVE DE ACESSO
         <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
@@ -235,69 +176,20 @@
       </p>
     </div>
 
-    <ul class="perks">
-      <li>
-        <svg class="icon" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-        <div><b>Todo dia, no seu horário</b><p>Um versículo do Novo Testamento chega como notificação.</p></div>
-      </li>
-      <li>
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
-        <div><b>Estude com o ChatGPT</b><p>Um clique e você recebe a explicação do versículo.</p></div>
-      </li>
-      <li>
-        <svg class="icon" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
-        <div><b>Leia o capítulo inteiro</b><p>Contexto completo e busca na Bíblia, dentro do app.</p></div>
-      </li>
-    </ul>
+    <section class="bonus">
+      <span class="tag">BÔNUS</span>
+      <h2>Você também leva o <em>CEOLocalBiblico.ai</em></h2>
+      <p class="lead">Mapa 3D da Terra Santa: veja lado a lado como eram as regiões na época de Jesus e como estão hoje.</p>
 
-    <section class="shots">
-      <h2>Como é por dentro</h2>
-      <p class="lead">Quatro telas para você ver o que recebe.</p>
-
-      <div class="grid">
-        <div class="shot">
-          <img src="assets/app-versiculo.jpg" alt="Tela principal do CEOBiblico.ai com o versículo do dia" loading="lazy">
-          <div>
-            <b>Versículo do dia</b>
-            <p>Abriu o app, o versículo do dia já está lá — com a data, a referência e o botão para ler o capítulo inteiro.</p>
-          </div>
-        </div>
-
-        <div class="shot">
-          <img src="assets/app-notificacao.jpg" alt="Opções de aviso e a notificação do Windows com o versículo" loading="lazy">
-          <div>
-            <b>Você escolhe como ser avisado</b>
-            <p>Notificação no canto da tela, o versículo aberto na tela inteira, ou os dois juntos — no horário que você marcar.</p>
-          </div>
-        </div>
-
-        <div class="shot">
-          <img src="assets/app-leitura.jpg" alt="Leitura de um capítulo da Bíblia com marca-texto colorido" loading="lazy">
-          <div>
-            <b>Leitura com marca-texto</b>
-            <p>Leia o capítulo inteiro dentro do app, aumente a letra e marque os versículos em cinco cores.</p>
-          </div>
-        </div>
-
-        <div class="shot">
-          <img src="assets/app-chave.jpg" alt="Tela de ativação com o campo da chave de acesso" loading="lazy">
-          <div>
-            <b>Ativação pela chave</b>
-            <p>Você recebe uma chave na compra, digita uma vez e pronto. Depois disso o app funciona no seu computador.</p>
-          </div>
-        </div>
-      </div>
+      <div class="vsl is-paused" data-src="https://yqfopqwuboqrmoljhknp.supabase.co/storage/v1/object/public/Videos/lv_0_20260924090616.mp4" data-nome="CEOLocalBiblico.ai"></div>
 
       <div class="cta">
-        <a class="btn" href="#checkout">
+        <a class="btn" href="#checkout" data-comprar>
           ADQUIRIR CHAVE DE ACESSO
           <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>
     </section>
-
-    <p class="verse">“Tua palavra é lâmpada para meus pés e luz para meu caminho.”</p>
-    <p class="ref">Salmos 119:105</p>
 
     <footer>
       <p>Programa para computador com Windows.</p>
@@ -305,33 +197,62 @@
     </footer>
   </main>
 
+  <template id="vslTpl">
+    <video playsinline preload="metadata"></video>
+
+    <button class="vsl-tap" type="button" aria-label="Pausar ou continuar" hidden>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></span>
+    </button>
+
+    <div class="vsl-ctl" hidden>
+      <button class="js-play" type="button" aria-label="Pausar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="js-icon-play" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <span class="vsl-time js-cur">0:00</span>
+      <div class="bar" role="slider" tabindex="0" aria-label="Avançar o vídeo"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="bar-track">
+          <div class="bar-fill"></div>
+          <div class="bar-dot"></div>
+        </div>
+      </div>
+      <span class="vsl-time js-dur">0:00</span>
+      <button class="js-mute" type="button" aria-label="Tirar o som">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="js-icon-mute" d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+      <button class="js-fs" type="button" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <button class="vsl-cover" type="button">
+      <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></span>
+    </button>
+  </template>
+
   <script>
-    /* Player próprio: o vídeo vem do YouTube, mas quem aparece são os nossos controles. */
+    /* Botões de compra → WhatsApp. Número com DDI + DDD, só dígitos (ex.: 5511999999999). */
     (function () {
-      var ID = '5RKFShiRkI4';
+      var WHATSAPP = '556296008155';
+      var MENSAGEM = 'Olá! Quero a liberação da minha chave de acesso do CEOBiblico.ai.';
+      if (!WHATSAPP) return;
+      var link = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(MENSAGEM);
+      Array.prototype.forEach.call(document.querySelectorAll('[data-comprar]'), function (a) {
+        a.href = link;
+        a.target = '_blank';
+        a.rel = 'noopener';
+      });
+    })();
 
-      var box = document.getElementById('vsl');
-      var cover = document.getElementById('vslPlay');
-      var tap = document.getElementById('vslTap');
-      var ctl = document.getElementById('vslCtl');
-      var btnPlay = document.getElementById('vslBtnPlay');
-      var iconPlay = document.getElementById('vslIconPlay');
-      var btnMute = document.getElementById('vslBtnMute');
-      var iconMute = document.getElementById('vslIconMute');
-      var btnFs = document.getElementById('vslBtnFs');
-      var bar = document.getElementById('vslBar');
-      var fill = document.getElementById('vslFill');
-      var dot = document.getElementById('vslDot');
-      var elCur = document.getElementById('vslCur');
-      var elDur = document.getElementById('vslDur');
-      if (!box || !cover) return;
-
+    /* Player próprio: os vídeos vêm do Supabase Storage e aparecem com os nossos controles. */
+    (function () {
       var PAUSE_D = 'M7 5h4v14H7zM13 5h4v14h-4z';
       var PLAY_D = 'M7 4.5v15l13-7.5z';
       var SOM_D = 'M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12';
       var MUDO_D = 'M4 9h4l5-4v14l-5-4H4zM17 9.5l5 5M22 9.5l-5 5';
 
-      var player = null, timer = null, arrastando = false;
+      var tpl = document.getElementById('vslTpl');
+      var todos = [];
 
       function mmss(s) {
         s = Math.max(0, Math.floor(s || 0));
@@ -340,122 +261,129 @@
         return m + ':' + (r < 10 ? '0' : '') + r;
       }
 
-      function pintar() {
-        if (!player || !player.getDuration) return;
-        var dur = player.getDuration() || 0;
-        var cur = arrastando ? null : player.getCurrentTime() || 0;
-        if (cur === null) return;
-        var pct = dur ? (cur / dur) * 100 : 0;
-        fill.style.width = pct + '%';
-        dot.style.left = pct + '%';
-        elCur.textContent = mmss(cur);
-        elDur.textContent = mmss(dur);
-        bar.setAttribute('aria-valuenow', Math.round(pct));
-        bar.setAttribute('aria-valuetext', mmss(cur) + ' de ' + mmss(dur));
-      }
+      function montar(box) {
+        box.appendChild(tpl.content.cloneNode(true));
 
-      function tocando(sim) {
-        box.classList.toggle('is-paused', !sim);
-        iconPlay.setAttribute('d', sim ? PAUSE_D : PLAY_D);
-        btnPlay.setAttribute('aria-label', sim ? 'Pausar' : 'Continuar');
-      }
+        var video = box.querySelector('video');
+        var cover = box.querySelector('.vsl-cover');
+        var tap = box.querySelector('.vsl-tap');
+        var ctl = box.querySelector('.vsl-ctl');
+        var btnPlay = box.querySelector('.js-play');
+        var iconPlay = box.querySelector('.js-icon-play');
+        var btnMute = box.querySelector('.js-mute');
+        var iconMute = box.querySelector('.js-icon-mute');
+        var btnFs = box.querySelector('.js-fs');
+        var bar = box.querySelector('.bar');
+        var fill = box.querySelector('.bar-fill');
+        var dot = box.querySelector('.bar-dot');
+        var elCur = box.querySelector('.js-cur');
+        var elDur = box.querySelector('.js-dur');
+        var arrastando = false;
 
-      function alternar() {
-        if (!player) return;
-        if (player.getPlayerState() === 1) player.pauseVideo();
-        else player.playVideo();
-      }
+        cover.setAttribute('aria-label', 'Assistir ao vídeo do ' + box.dataset.nome);
+        // "#t=0.1" faz o navegador mostrar o primeiro quadro como capa
+        video.src = box.dataset.src + '#t=0.1';
+        todos.push(video);
 
-      function fracaoDoEvento(e) {
-        var r = bar.getBoundingClientRect();
-        return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-      }
+        function pintar() {
+          if (arrastando) return;
+          var dur = video.duration || 0;
+          var cur = video.currentTime || 0;
+          var pct = dur ? (cur / dur) * 100 : 0;
+          fill.style.width = pct + '%';
+          dot.style.left = pct + '%';
+          elCur.textContent = mmss(cur);
+          elDur.textContent = mmss(dur);
+          bar.setAttribute('aria-valuenow', Math.round(pct));
+          bar.setAttribute('aria-valuetext', mmss(cur) + ' de ' + mmss(dur));
+        }
 
-      function mostrarEm(f) {
-        var dur = player && player.getDuration ? player.getDuration() : 0;
-        fill.style.width = f * 100 + '%';
-        dot.style.left = f * 100 + '%';
-        elCur.textContent = mmss(f * dur);
-      }
+        function tocando(sim) {
+          box.classList.toggle('is-paused', !sim);
+          iconPlay.setAttribute('d', sim ? PAUSE_D : PLAY_D);
+          btnPlay.setAttribute('aria-label', sim ? 'Pausar' : 'Continuar');
+        }
 
-      bar.addEventListener('pointerdown', function (e) {
-        if (!player) return;
-        arrastando = true;
-        bar.setPointerCapture(e.pointerId);
-        mostrarEm(fracaoDoEvento(e));
-      });
-      bar.addEventListener('pointermove', function (e) {
-        if (arrastando) mostrarEm(fracaoDoEvento(e));
-      });
-      bar.addEventListener('pointerup', function (e) {
-        if (!arrastando || !player) return;
-        arrastando = false;
-        player.seekTo(fracaoDoEvento(e) * (player.getDuration() || 0), true);
-        pintar();
-      });
-      bar.addEventListener('keydown', function (e) {
-        if (!player) return;
-        var passo = e.key === 'ArrowRight' ? 5 : e.key === 'ArrowLeft' ? -5 : 0;
-        if (!passo) return;
-        e.preventDefault();
-        player.seekTo(Math.max(0, (player.getCurrentTime() || 0) + passo), true);
-        pintar();
-      });
+        function alternar() {
+          if (video.paused || video.ended) video.play(); else video.pause();
+        }
 
-      btnPlay.addEventListener('click', alternar);
-      tap.addEventListener('click', alternar);
+        function fracaoDoEvento(e) {
+          var r = bar.getBoundingClientRect();
+          return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        }
 
-      btnMute.addEventListener('click', function () {
-        if (!player) return;
-        var mudo = player.isMuted();
-        if (mudo) player.unMute(); else player.mute();
-        iconMute.setAttribute('d', mudo ? SOM_D : MUDO_D);
-        btnMute.setAttribute('aria-label', mudo ? 'Tirar o som' : 'Ligar o som');
-      });
+        function mostrarEm(f) {
+          fill.style.width = f * 100 + '%';
+          dot.style.left = f * 100 + '%';
+          elCur.textContent = mmss(f * (video.duration || 0));
+        }
 
-      btnFs.addEventListener('click', function () {
-        if (document.fullscreenElement) { document.exitFullscreen(); return; }
-        if (box.requestFullscreen) box.requestFullscreen();
-        else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
-      });
-
-      function criarPlayer() {
-        player = new YT.Player('vslFrame', {
-          videoId: ID,
-          host: 'https://www.youtube-nocookie.com',
-          playerVars: {
-            autoplay: 1, controls: 0, rel: 0, modestbranding: 1,
-            playsinline: 1, disablekb: 1, fs: 0, iv_load_policy: 3
-          },
-          events: {
-            onReady: function (e) {
-              cover.hidden = true;
-              tap.hidden = false;
-              ctl.hidden = false;
-              e.target.playVideo();
-              pintar();
-              timer = setInterval(pintar, 250);
-            },
-            onStateChange: function (e) {
-              tocando(e.data === YT.PlayerState.PLAYING);
-              if (e.data === YT.PlayerState.ENDED) { tocando(false); pintar(); }
-            }
+        video.addEventListener('loadedmetadata', function () {
+          if (video.videoWidth && video.videoHeight) {
+            box.style.aspectRatio = video.videoWidth + ' / ' + video.videoHeight;
+            box.classList.toggle('is-vertical', video.videoHeight > video.videoWidth);
           }
+          pintar();
+        });
+        video.addEventListener('timeupdate', pintar);
+        video.addEventListener('play', function () {
+          // Só um vídeo tocando por vez
+          todos.forEach(function (v) { if (v !== video) v.pause(); });
+          tocando(true);
+        });
+        video.addEventListener('pause', function () { tocando(false); });
+        video.addEventListener('ended', function () { tocando(false); pintar(); });
+
+        cover.addEventListener('click', function () {
+          cover.hidden = true;
+          tap.hidden = false;
+          ctl.hidden = false;
+          video.currentTime = 0;
+          video.play();
+        });
+
+        bar.addEventListener('pointerdown', function (e) {
+          if (!video.duration) return;
+          arrastando = true;
+          bar.setPointerCapture(e.pointerId);
+          mostrarEm(fracaoDoEvento(e));
+        });
+        bar.addEventListener('pointermove', function (e) {
+          if (arrastando) mostrarEm(fracaoDoEvento(e));
+        });
+        bar.addEventListener('pointerup', function (e) {
+          if (!arrastando) return;
+          arrastando = false;
+          video.currentTime = fracaoDoEvento(e) * (video.duration || 0);
+          pintar();
+        });
+        bar.addEventListener('keydown', function (e) {
+          var passo = e.key === 'ArrowRight' ? 5 : e.key === 'ArrowLeft' ? -5 : 0;
+          if (!passo || !video.duration) return;
+          e.preventDefault();
+          video.currentTime = Math.min(video.duration, Math.max(0, video.currentTime + passo));
+          pintar();
+        });
+
+        btnPlay.addEventListener('click', alternar);
+        tap.addEventListener('click', alternar);
+
+        btnMute.addEventListener('click', function () {
+          video.muted = !video.muted;
+          iconMute.setAttribute('d', video.muted ? MUDO_D : SOM_D);
+          btnMute.setAttribute('aria-label', video.muted ? 'Ligar o som' : 'Tirar o som');
+        });
+
+        btnFs.addEventListener('click', function () {
+          if (document.fullscreenElement) { document.exitFullscreen(); return; }
+          if (box.requestFullscreen) box.requestFullscreen();
+          else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
+          else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iPhone
         });
       }
 
-      cover.addEventListener('click', function () {
-        // Em preview dentro de iframe (claude.ai) o player é bloqueado: manda pro YouTube.
-        var emIframe = false;
-        try { emIframe = window.top !== window.self; } catch (err) { emIframe = true; }
-        if (emIframe) { window.open('https://www.youtube.com/watch?v=' + ID, '_blank', 'noopener'); return; }
-
-        if (window.YT && window.YT.Player) { criarPlayer(); return; }
-        window.onYouTubeIframeAPIReady = criarPlayer;
-        var s = document.createElement('script');
-        s.src = 'https://www.youtube.com/iframe_api';
-        document.head.appendChild(s);
-      });
+      Array.prototype.forEach.call(document.querySelectorAll('.vsl[data-src]'), montar);
     })();
   </script>
 </body>
