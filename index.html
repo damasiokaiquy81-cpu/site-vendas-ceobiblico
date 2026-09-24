@@ -254,12 +254,12 @@
 
     <div class="cta">
       <a class="btn" href="#checkout" data-comprar>
-        ADQUIRIR CHAVE DE ACESSO
+        RESGATAR CHAVE DE ACESSO
         <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
       <p class="secure">
-        <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        Compra segura · Os dois programas na mesma chave
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></svg>
+        Os dois programas em uma só chave · Liberação na hora
       </p>
     </div>
 
@@ -616,6 +616,14 @@
 
       Array.prototype.forEach.call(document.querySelectorAll('.carrossel [data-ir]'), function (b) {
         b.addEventListener('click', function () { ir(Number(b.dataset.ir)); });
+      });
+
+      // Terminou o primeiro vídeo → passa para o segundo e já começa a tocar
+      slides[0].querySelector('video').addEventListener('ended', function () {
+        ir(1);
+        var capa = slides[1].querySelector('.vsl-cover');
+        if (!capa.hidden) capa.click();
+        else slides[1].querySelector('video').play();
       });
     })();
   </script>
