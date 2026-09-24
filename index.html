@@ -142,15 +142,77 @@
     .secure { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
     .secure .icon { width: 14px; height: 14px; color: var(--gold); }
 
-    .bonus { margin: 52px auto 0; }
-    .tag {
-      display: inline-block; padding: 4px 10px; border-radius: 99px;
-      border: 1px solid var(--gold); color: var(--gold);
-      font-size: 11.5px; font-weight: 700; letter-spacing: .08em;
+    /* Carrossel dos dois programas */
+    .carrossel { margin: 26px auto 0; }
+    .slide { animation: entrar .3s ease; }
+    @keyframes entrar { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .slide { animation: none; } }
+    .slide h2 { margin-top: 0; }
+    .slide-midia { position: relative; margin-top: 16px; }
+    .slide-midia .vsl { margin-top: 0; }
+    .seta {
+      position: absolute; top: 50%; z-index: 4; width: 46px; height: 46px; margin-top: -23px;
+      border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+      background: rgba(18, 18, 20, .82); border: 1px solid var(--gold); color: var(--gold);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .5); transition: background .15s, color .15s, transform .15s;
     }
+    .seta:hover { background: var(--gold); color: #17160f; }
+    .seta svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    .seta-dir { right: 8px; animation: cutucar 1.8s ease-in-out infinite; }
+    .seta-esq { left: 8px; }
+    @keyframes cutucar { 0%, 100% { transform: none; } 50% { transform: translateX(4px); } }
+    @media (prefers-reduced-motion: reduce) { .seta-dir { animation: none; } }
+    .pontos { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+    .pontos button {
+      width: 9px; height: 9px; padding: 0; border: 0; border-radius: 99px; cursor: pointer;
+      background: var(--border-2); transition: width .2s, background .2s;
+    }
+    .pontos button[aria-current="true"] { width: 24px; background: var(--gold); }
 
     footer { color: var(--muted); font-size: 12px; margin-top: 44px; }
     footer p { margin: 0 0 4px; }
+
+    /* Checkout Pix (janela por cima da página) */
+    .pix {
+      position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px;
+      background: rgba(0, 0, 0, .72); overflow-y: auto;
+    }
+    .pix-box {
+      position: relative; width: 100%; max-width: 400px; padding: 26px 20px 22px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, .6);
+    }
+    .pix-box h2 { margin: 0 0 4px; }
+    .pix-x {
+      position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border: 0; border-radius: 8px;
+      background: none; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer;
+    }
+    .pix-x:hover { color: var(--text); background: var(--surface-2); }
+    .pix-preco { color: var(--gold); font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 10px 0 14px; }
+    .pix-campo {
+      display: block; width: 100%; margin: 0 0 12px; padding: 13px 14px;
+      background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px;
+      color: var(--text); font: inherit; font-size: 15.5px;
+    }
+    .pix-campo:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: transparent; }
+    .pix .btn { animation: none; }
+    .pix .btn[disabled] { opacity: .6; cursor: wait; }
+    .pix-erro { color: #f08a7e; font-size: 13.5px; margin: 10px 0 0; }
+    .pix-qr {
+      display: block; width: 220px; height: 220px; margin: 14px auto; padding: 10px;
+      background: #fff; border-radius: 12px;
+    }
+    .pix-codigo {
+      display: block; width: 100%; height: 68px; margin: 0 0 10px; padding: 9px 10px; resize: none;
+      background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px;
+      color: var(--muted); font: 12px/1.4 ui-monospace, Consolas, monospace; word-break: break-all;
+    }
+    .pix-espera { display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--muted); font-size: 13.5px; margin: 14px 0 0; }
+    .giro {
+      width: 15px; height: 15px; flex: none; border-radius: 50%;
+      border: 2px solid var(--border-2); border-top-color: var(--gold); animation: giro .8s linear infinite;
+    }
+    @keyframes giro { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -160,10 +222,38 @@
       <p class="brand">CEOBiblico.ai <span>Versículo do Dia</span></p>
     </div>
 
-    <h1>Um versículo por dia, <em>direto no seu computador</em></h1>
-    <p class="lead">Assista ao vídeo e veja como funciona.</p>
+    <h1>Estude a Bíblia <em>direto no seu computador</em></h1>
+    <p class="lead">Uma chave de acesso, dois programas. Assista aos vídeos e veja como funcionam.</p>
 
-    <div class="vsl is-paused" data-src="https://yqfopqwuboqrmoljhknp.supabase.co/storage/v1/object/public/Videos/VID_20260923_100942.mp4" data-nome="CEOBiblico.ai"></div>
+    <!-- Carrossel: um programa por vez, setas para passar -->
+    <div class="carrossel" aria-roledescription="carrossel" aria-label="Os dois programas">
+      <section class="slide" aria-roledescription="slide" aria-label="1 de 2">
+        <h2><em>CEOLocalBiblico.ai</em></h2>
+        <p class="lead">Mapa 3D da Terra Santa: veja lado a lado como eram as regiões na época de Jesus e como estão hoje.</p>
+        <div class="slide-midia">
+          <div class="vsl is-paused" data-src="https://yqfopqwuboqrmoljhknp.supabase.co/storage/v1/object/public/Videos/VID_20260924_154043.mp4" data-nome="CEOLocalBiblico.ai"></div>
+          <button class="seta seta-dir" type="button" data-ir="1" aria-label="Ver o CEOBiblico.ai">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="slide" aria-roledescription="slide" aria-label="2 de 2" hidden>
+        <h2><em>CEOBiblico.ai</em></h2>
+        <p class="lead">Um versículo por dia no seu computador, para estudar com o ChatGPT em um clique.</p>
+        <div class="slide-midia">
+          <div class="vsl is-paused" data-src="https://yqfopqwuboqrmoljhknp.supabase.co/storage/v1/object/public/Videos/VID_20260923_100942.mp4" data-nome="CEOBiblico.ai"></div>
+          <button class="seta seta-esq" type="button" data-ir="0" aria-label="Ver o CEOLocalBiblico.ai">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <div class="pontos">
+        <button type="button" data-ir="0" aria-label="CEOLocalBiblico.ai" aria-current="true"></button>
+        <button type="button" data-ir="1" aria-label="CEOBiblico.ai"></button>
+      </div>
+    </div>
 
     <div class="cta">
       <a class="btn" href="#checkout" data-comprar>
@@ -172,30 +262,48 @@
       </a>
       <p class="secure">
         <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        Compra segura · Acesso liberado na hora
+        Compra segura · Os dois programas na mesma chave
       </p>
     </div>
-
-    <section class="bonus">
-      <span class="tag">BÔNUS</span>
-      <h2>Você também leva o <em>CEOLocalBiblico.ai</em></h2>
-      <p class="lead">Mapa 3D da Terra Santa: veja lado a lado como eram as regiões na época de Jesus e como estão hoje.</p>
-
-      <div class="vsl is-paused" data-src="https://yqfopqwuboqrmoljhknp.supabase.co/storage/v1/object/public/Videos/lv_0_20260924090616.mp4" data-nome="CEOLocalBiblico.ai"></div>
-
-      <div class="cta">
-        <a class="btn" href="#checkout" data-comprar>
-          ADQUIRIR CHAVE DE ACESSO
-          <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-    </section>
 
     <footer>
       <p>Programa para computador com Windows.</p>
       <p>© 2026 CEOBiblico.ai</p>
     </footer>
   </main>
+
+  <div class="pix" id="pix" role="dialog" aria-modal="true" aria-labelledby="pixTitulo" hidden>
+    <div class="pix-box">
+      <button class="pix-x" type="button" aria-label="Fechar" data-fechar>×</button>
+
+      <form id="pixPasso1" novalidate>
+        <h2 id="pixTitulo">Chave de acesso</h2>
+        <p class="lead">CEOBiblico.ai + CEOLocalBiblico.ai</p>
+        <p class="pix-preco">R$ 25,00</p>
+        <input class="pix-campo" id="pixNome" type="text" autocomplete="name"
+               placeholder="Seu nome" aria-label="Seu nome" required>
+        <input class="pix-campo" id="pixEmail" type="email" inputmode="email" autocomplete="email"
+               placeholder="Seu melhor e-mail" aria-label="Seu e-mail" required>
+        <input class="pix-campo" id="pixTel" type="tel" inputmode="tel" autocomplete="tel-national"
+               placeholder="Seu WhatsApp com DDD" aria-label="Seu WhatsApp com DDD" required>
+        <button class="btn" type="submit" id="pixGerar">GERAR PIX</button>
+        <p class="pix-erro" id="pixErro" role="alert" hidden></p>
+        <p class="secure">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Pagamento processado pelo Mercado Pago
+        </p>
+      </form>
+
+      <div id="pixPasso2" hidden>
+        <h2>Pague com Pix</h2>
+        <p class="lead">Abra o app do seu banco e escaneie o QR Code, ou use o Pix Copia e Cola.</p>
+        <img class="pix-qr" id="pixQr" alt="QR Code do Pix de R$ 25,00">
+        <textarea class="pix-codigo" id="pixCodigo" readonly aria-label="Código Pix Copia e Cola"></textarea>
+        <button class="btn" type="button" id="pixCopiar">COPIAR CÓDIGO PIX</button>
+        <p class="pix-espera"><span class="giro"></span> Aguardando o pagamento… a tela muda sozinha.</p>
+      </div>
+    </div>
+  </div>
 
   <template id="vslTpl">
     <video playsinline preload="metadata"></video>
@@ -231,17 +339,129 @@
   </template>
 
   <script>
-    /* Botões de compra → WhatsApp. Número com DDI + DDD, só dígitos (ex.: 5511999999999). */
+    /* Botões de compra → Pix do Mercado Pago, pela função "pix" do Supabase
+       (supabase/functions/pix). Quando o pagamento é aprovado, vai para obrigado.html. */
     (function () {
-      var WHATSAPP = '556296008155';
-      var MENSAGEM = 'Olá! Quero a liberação da minha chave de acesso do CEOBiblico.ai.';
-      if (!WHATSAPP) return;
-      var link = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(MENSAGEM);
-      Array.prototype.forEach.call(document.querySelectorAll('[data-comprar]'), function (a) {
-        a.href = link;
-        a.target = '_blank';
-        a.rel = 'noopener';
+      var API = 'https://yqfopqwuboqrmoljhknp.supabase.co/functions/v1/pix';
+
+      // Código da pressel: chega no link (?d=...) e fica guardado para as próximas visitas
+      var dispositivo = new URLSearchParams(location.search).get('d') || '';
+      try {
+        if (dispositivo) localStorage.setItem('ceob_disp', dispositivo);
+        else dispositivo = localStorage.getItem('ceob_disp') || '';
+      } catch (e) {}
+
+      var janela = document.getElementById('pix');
+      var passo1 = document.getElementById('pixPasso1');
+      var passo2 = document.getElementById('pixPasso2');
+      var nome = document.getElementById('pixNome');
+      var email = document.getElementById('pixEmail');
+      var tel = document.getElementById('pixTel');
+      var gerar = document.getElementById('pixGerar');
+      var erro = document.getElementById('pixErro');
+      var qr = document.getElementById('pixQr');
+      var codigo = document.getElementById('pixCodigo');
+      var copiar = document.getElementById('pixCopiar');
+      var pedido = null;   // Pix já gerado nesta visita: reabrir a janela mostra o mesmo
+      var espera = null;
+
+      function abrir(e) {
+        e.preventDefault();
+        janela.hidden = false;
+        document.body.style.overflow = 'hidden';
+        if (pedido) acompanhar(); else nome.focus();
+      }
+
+      function fechar() {
+        janela.hidden = true;
+        document.body.style.overflow = '';
+        clearTimeout(espera);
+      }
+
+      function mostrarErro(msg) {
+        erro.textContent = msg;
+        erro.hidden = false;
+      }
+
+      function acompanhar() {
+        clearTimeout(espera);
+        espera = setTimeout(function () {
+          fetch(API + '?id=' + pedido.id)
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.pago) { location.href = 'obrigado.html?id=' + pedido.id; return; }
+              if (d.status === 'cancelled' || d.status === 'rejected') {
+                pedido = null;
+                passo2.hidden = true;
+                passo1.hidden = false;
+                mostrarErro('Esse Pix expirou. Gere um novo para continuar.');
+                return;
+              }
+              if (!janela.hidden) acompanhar();
+            })
+            .catch(function () { if (!janela.hidden) acompanhar(); });
+        }, 4000);
+      }
+
+      passo1.addEventListener('submit', function (e) {
+        e.preventDefault();
+        erro.hidden = true;
+        var digitos = tel.value.replace(/\D/g, '');
+        if (nome.value.trim().length < 2) { mostrarErro('Digite o seu nome.'); nome.focus(); return; }
+        if (!email.checkValidity() || !email.value.trim()) { mostrarErro('Digite um e-mail válido.'); email.focus(); return; }
+        if (digitos.length < 10 || digitos.length > 13) { mostrarErro('Digite o seu WhatsApp com DDD.'); tel.focus(); return; }
+
+        gerar.disabled = true;
+        gerar.textContent = 'GERANDO PIX…';
+        fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome: nome.value.trim(),
+            email: email.value.trim(),
+            telefone: digitos,
+            dispositivo: dispositivo
+          })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (!d.id) throw new Error(d.erro);
+            pedido = d;
+            qr.src = 'data:image/png;base64,' + d.qrcode;
+            codigo.value = d.copiaecola;
+            passo1.hidden = true;
+            passo2.hidden = false;
+            acompanhar();
+          })
+          .catch(function (err) {
+            mostrarErro((err && err.message) || 'Não foi possível gerar o Pix. Tente de novo.');
+          })
+          .then(function () {
+            gerar.disabled = false;
+            gerar.textContent = 'GERAR PIX';
+          });
       });
+
+      copiar.addEventListener('click', function () {
+        function ok() {
+          copiar.textContent = 'CÓDIGO COPIADO ✓';
+          setTimeout(function () { copiar.textContent = 'COPIAR CÓDIGO PIX'; }, 2500);
+        }
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(codigo.value).then(ok, function () { codigo.select(); document.execCommand('copy'); ok(); });
+        } else {
+          codigo.select();
+          document.execCommand('copy');
+          ok();
+        }
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-comprar]'), function (a) {
+        a.addEventListener('click', abrir);
+      });
+      janela.querySelector('[data-fechar]').addEventListener('click', fechar);
+      janela.addEventListener('click', function (e) { if (e.target === janela) fechar(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !janela.hidden) fechar(); });
     })();
 
     /* Player próprio: os vídeos vêm do Supabase Storage e aparecem com os nossos controles. */
@@ -384,6 +604,22 @@
       }
 
       Array.prototype.forEach.call(document.querySelectorAll('.vsl[data-src]'), montar);
+    })();
+
+    /* Carrossel: mostra um programa por vez; trocar pausa o vídeo que estava tocando. */
+    (function () {
+      var slides = document.querySelectorAll('.slide');
+      var pontos = document.querySelectorAll('.pontos button');
+
+      function ir(n) {
+        Array.prototype.forEach.call(document.querySelectorAll('.carrossel video'), function (v) { v.pause(); });
+        Array.prototype.forEach.call(slides, function (s, i) { s.hidden = i !== n; });
+        Array.prototype.forEach.call(pontos, function (p, i) { p.setAttribute('aria-current', i === n ? 'true' : 'false'); });
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll('.carrossel [data-ir]'), function (b) {
+        b.addEventListener('click', function () { ir(Number(b.dataset.ir)); });
+      });
     })();
   </script>
 </body>
