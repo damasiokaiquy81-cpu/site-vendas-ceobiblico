@@ -109,19 +109,8 @@
     }
     .vsl-ctl button:hover { color: var(--gold-2); }
     .vsl-ctl button svg { width: 19px; height: 19px; fill: currentColor; }
-    .vsl-time { color: #fff; font-size: 12px; font-variant-numeric: tabular-nums; flex: none; }
-
-    .bar { flex: 1; height: 18px; display: flex; align-items: center; cursor: pointer; touch-action: none; }
-    .bar-track { position: relative; width: 100%; height: 4px; border-radius: 99px; background: rgba(255, 255, 255, .3); }
-    .bar-fill { position: absolute; inset: 0 auto 0 0; width: 0%; border-radius: 99px; background: var(--gold); }
-    .bar-dot {
-      position: absolute; top: 50%; left: 0; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;
-      border-radius: 50%; background: var(--gold); box-shadow: 0 1px 4px rgba(0, 0, 0, .5);
-    }
-    .bar:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 3px; border-radius: 4px; }
-
-    .vsl:fullscreen { width: 100%; height: 100%; max-width: none; aspect-ratio: auto; border-radius: 0; border: 0; }
-    .vsl:-webkit-full-screen { width: 100%; height: 100%; max-width: none; border-radius: 0; }
+    /* Sem barra de progresso, tempo nem tela cheia: play à esquerda, som à direita */
+    .vsl-ctl .js-mute { margin-left: auto; }
 
     .cta { margin: 18px auto 0; max-width: 460px; }
     .btn {
@@ -313,20 +302,8 @@
       <button class="js-play" type="button" aria-label="Pausar">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path class="js-icon-play" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
       </button>
-      <span class="vsl-time js-cur">0:00</span>
-      <div class="bar" role="slider" tabindex="0" aria-label="Avançar o vídeo"
-           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-        <div class="bar-track">
-          <div class="bar-fill"></div>
-          <div class="bar-dot"></div>
-        </div>
-      </div>
-      <span class="vsl-time js-dur">0:00</span>
       <button class="js-mute" type="button" aria-label="Tirar o som">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path class="js-icon-mute" d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-      </button>
-      <button class="js-fs" type="button" aria-label="Tela cheia">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
       </button>
     </div>
 
@@ -471,13 +448,6 @@
       var tpl = document.getElementById('vslTpl');
       var todos = [];
 
-      function mmss(s) {
-        s = Math.max(0, Math.floor(s || 0));
-        var m = Math.floor(s / 60);
-        var r = s % 60;
-        return m + ':' + (r < 10 ? '0' : '') + r;
-      }
-
       function montar(box) {
         box.appendChild(tpl.content.cloneNode(true));
 
@@ -489,31 +459,11 @@
         var iconPlay = box.querySelector('.js-icon-play');
         var btnMute = box.querySelector('.js-mute');
         var iconMute = box.querySelector('.js-icon-mute');
-        var btnFs = box.querySelector('.js-fs');
-        var bar = box.querySelector('.bar');
-        var fill = box.querySelector('.bar-fill');
-        var dot = box.querySelector('.bar-dot');
-        var elCur = box.querySelector('.js-cur');
-        var elDur = box.querySelector('.js-dur');
-        var arrastando = false;
 
         cover.setAttribute('aria-label', 'Assistir ao vídeo do ' + box.dataset.nome);
         // "#t=0.1" faz o navegador mostrar o primeiro quadro como capa
         video.src = box.dataset.src + '#t=0.1';
         todos.push(video);
-
-        function pintar() {
-          if (arrastando) return;
-          var dur = video.duration || 0;
-          var cur = video.currentTime || 0;
-          var pct = dur ? (cur / dur) * 100 : 0;
-          fill.style.width = pct + '%';
-          dot.style.left = pct + '%';
-          elCur.textContent = mmss(cur);
-          elDur.textContent = mmss(dur);
-          bar.setAttribute('aria-valuenow', Math.round(pct));
-          bar.setAttribute('aria-valuetext', mmss(cur) + ' de ' + mmss(dur));
-        }
 
         function tocando(sim) {
           box.classList.toggle('is-paused', !sim);
@@ -525,32 +475,19 @@
           if (video.paused || video.ended) video.play(); else video.pause();
         }
 
-        function fracaoDoEvento(e) {
-          var r = bar.getBoundingClientRect();
-          return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-        }
-
-        function mostrarEm(f) {
-          fill.style.width = f * 100 + '%';
-          dot.style.left = f * 100 + '%';
-          elCur.textContent = mmss(f * (video.duration || 0));
-        }
-
         video.addEventListener('loadedmetadata', function () {
           if (video.videoWidth && video.videoHeight) {
             box.style.aspectRatio = video.videoWidth + ' / ' + video.videoHeight;
             box.classList.toggle('is-vertical', video.videoHeight > video.videoWidth);
           }
-          pintar();
         });
-        video.addEventListener('timeupdate', pintar);
         video.addEventListener('play', function () {
           // Só um vídeo tocando por vez
           todos.forEach(function (v) { if (v !== video) v.pause(); });
           tocando(true);
         });
         video.addEventListener('pause', function () { tocando(false); });
-        video.addEventListener('ended', function () { tocando(false); pintar(); });
+        video.addEventListener('ended', function () { tocando(false); });
 
         cover.addEventListener('click', function () {
           cover.hidden = true;
@@ -560,29 +497,6 @@
           video.play();
         });
 
-        bar.addEventListener('pointerdown', function (e) {
-          if (!video.duration) return;
-          arrastando = true;
-          bar.setPointerCapture(e.pointerId);
-          mostrarEm(fracaoDoEvento(e));
-        });
-        bar.addEventListener('pointermove', function (e) {
-          if (arrastando) mostrarEm(fracaoDoEvento(e));
-        });
-        bar.addEventListener('pointerup', function (e) {
-          if (!arrastando) return;
-          arrastando = false;
-          video.currentTime = fracaoDoEvento(e) * (video.duration || 0);
-          pintar();
-        });
-        bar.addEventListener('keydown', function (e) {
-          var passo = e.key === 'ArrowRight' ? 5 : e.key === 'ArrowLeft' ? -5 : 0;
-          if (!passo || !video.duration) return;
-          e.preventDefault();
-          video.currentTime = Math.min(video.duration, Math.max(0, video.currentTime + passo));
-          pintar();
-        });
-
         btnPlay.addEventListener('click', alternar);
         tap.addEventListener('click', alternar);
 
@@ -590,13 +504,6 @@
           video.muted = !video.muted;
           iconMute.setAttribute('d', video.muted ? MUDO_D : SOM_D);
           btnMute.setAttribute('aria-label', video.muted ? 'Ligar o som' : 'Tirar o som');
-        });
-
-        btnFs.addEventListener('click', function () {
-          if (document.fullscreenElement) { document.exitFullscreen(); return; }
-          if (box.requestFullscreen) box.requestFullscreen();
-          else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
-          else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iPhone
         });
       }
 
